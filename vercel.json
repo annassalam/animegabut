@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "public": "public",
+  "rewrites": [
+    { "source": "/api/trending", "destination": "/api/trending.js" },
+    { "source": "/api/search", "destination": "/api/search.js" },
+    { "source": "/api/episodes", "destination": "/api/episodes.js" }
+  ]
+}
