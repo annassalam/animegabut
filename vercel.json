@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "public": "public",
+  "public": true,
   "rewrites": [
     { "source": "/api/trending", "destination": "/api/trending.js" },
     { "source": "/api/search", "destination": "/api/search.js" },
