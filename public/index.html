@@ -89,6 +89,9 @@ async function rekamJejakKunjungan() {
       id_device: idDevice,
       tanggal_dan_jam: new Date().toISOString(),
     }),
+  headers: {
+    'Content-Type': 'application/json'
+  }
   });
 }
 
