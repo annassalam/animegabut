@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detail Anime</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: url('https://wallpapercave.com/wp/wp8972592.jpg') no-repeat center center / cover;
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <meta name="theme-color" content="#1e40af" />
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log("SW registered", reg))
+          .catch(err => console.error("SW registration failed", err));
+      });
+    }
+  </script>
+</head>
+<body class="min-h-screen text-white bg-cover bg-center">
+  <div class="max-w-5xl mx-auto px-6 py-10 space-y-8">
+    
+    <!-- Tombol Kembali -->
+    <a href="index.html" class="inline-block text-sm px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-full shadow transition-all">
+      ← Kembali
+    </a>
+
+    <!-- Konten Detail Anime -->
+    <div id="anime-detail" class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6 md:p-8"></div>
+
+  </div>
+
+<script>
+  const anime = JSON.parse(localStorage.getItem("selectedAnime"));
+
+  if (!anime) {
+    document.getElementById("anime-detail").innerHTML = "<p>Anime tidak ditemukan.</p>";
+  } else {
+    document.getElementById("anime-detail").innerHTML = `
+      <div class="flex flex-col md:flex-row gap-8">
+        <!-- Gambar -->
+        <div class="flex-shrink-0">
+          <img src="${anime.thumbnail_url}" alt="${anime.title}" class="w-full md:w-64 h-auto rounded-xl shadow-lg" />
+        </div>
+
+        <!-- Info -->
+        <div class="space-y-4">
+          <h1 class="text-3xl font-bold leading-snug">${anime.title}</h1>
+          ${anime.title_jp ? `<p class="text-base italic opacity-80">${anime.title_jp}</p>` : ''}
+          <p><span class="font-semibold">Genres:</span> ${anime.genres}</p>
+          <p><span class="font-semibold">Year:</span> ${anime.year}</p>
+          <p><span class="font-semibold">Description:</span> ${anime.description || "Tidak tersedia."}</p>
+        </div>
+      </div>
+
+      <!-- Video Player -->
+      <div class="mt-10">
+        <h2 class="text-xl font-semibold mb-4">Tonton Episode</h2>
+        <div class="w-full md:w-[800px] mx-auto aspect-video">
+          <iframe id="video-frame" src="${anime.embed_url}" frameborder="0" allowfullscreen class="w-full h-full rounded-xl shadow-lg"></iframe>
+        </div>
+      </div>
+
+      <!-- Daftar Episode -->
+      <div class="mt-10">
+        <h2 class="text-xl font-semibold mb-4">Episode Lainnya</h2>
+        <div id="episode-list" class="flex flex-wrap gap-3 justify-center md:justify-start"></div>
+      </div>
+    `;
+
+    // Fetch daftar episode
+    fetch(`/api/episodes?title=${encodeURIComponent(anime.title)}`)
+      .then(res => res.json())
+      .then(episodes => {
+        const episodeList = document.getElementById("episode-list");
+        if (!Array.isArray(episodes) || episodes.length === 0) {
+          episodeList.innerHTML = "<p class='text-white'>Tidak ada daftar episode.</p>";
+          return;
+        }
+
+        // Urutkan episode secara menurun
+        episodes.sort((a, b) => parseInt(b.episode) - parseInt(a.episode));
+
+        // Tampilkan tombol episode
+        episodes.forEach(ep => {
+          const button = document.createElement("button");
+          button.textContent = `Episode ${ep.episode}`;
+          button.className = "px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-md text-sm";
+          button.addEventListener("click", () => {
+            document.getElementById("video-frame").src = ep.embed_url;
+            window.scrollTo({ top: document.getElementById("video-frame").offsetTop - 100, behavior: 'smooth' });
+          });
+          episodeList.appendChild(button);
+        });
+      })
+      .catch(err => {
+        console.error("Gagal mengambil episode:", err);
+        document.getElementById("episode-list").innerHTML = "<p class='text-white'>Gagal memuat daftar episode.</p>";
+      });
+  }
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log("✅ Service Worker registered", reg))
+        .catch(err => console.error("❌ SW registration failed:", err));
+    });
+  }
+</script>
+</body>
+</html>
