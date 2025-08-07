@@ -29,6 +29,14 @@
 <body class="min-h-screen bg-cover bg-center text-white" style="background-image: url('https://wallpapercave.com/wp/wp8972592.jpg')">
   <div class="w-full max-w-6xl mx-auto p-6 space-y-6">
 
+    <!-- pengunjung -->
+<div class="text-center">
+  <h1 class="text-4xl font-bold drop-shadow-lg">Selamat Datang di Anime Trending</h1>
+  <p id="pengunjung-hari-ini" class="mt-2 text-lg">Jumlah pengunjung hari ini 0</p>
+</div>
+<!-- batas kode pengunjung -->
+
+
     <!-- Pencarian anime -->
     <div class="flex justify-center">
       <input
@@ -56,6 +64,50 @@
           .catch(err => console.error("❌ SW registration failed:", err));
       });
     }
+
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbya4lK9TqpmV-lhKEDiG03eJIi5Ce5dSh5blR08NCeB9jAjZTk_t0JyX1Qew-CVLWkgjA/exec';
+
+// Buat ID device unik & simpan di localStorage
+function getDeviceId() {
+  let id = localStorage.getItem('device_id');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('device_id', id);
+  }
+  return id;
+}
+
+// Kirim data kunjungan jika belum ada untuk hari ini
+async function rekamJejakKunjungan() {
+  const idDevice = getDeviceId();
+  const today = new Date().toISOString().split('T')[0];
+
+  await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'rekamjejak',
+      id_device: idDevice,
+      tanggal_dan_jam: new Date().toISOString(),
+    }),
+  });
+}
+
+// Ambil jumlah pengunjung hari ini
+async function tampilkanJumlahPengunjung() {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'hitungHariIni' }),
+  });
+  const data = await res.json();
+  if (data.status === 'success') {
+    document.getElementById('pengunjung-hari-ini').textContent =
+      `Jumlah pengunjung hari ini ${data.count}`;
+  }
+}
+
+// Jalankan saat halaman dibuka
+rekamJejakKunjungan();
+tampilkanJumlahPengunjung();
   </script>
 </body>
 </html>
