@@ -66,9 +66,9 @@
     }
   </script>
   <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbwgmjQBK5dSl6XyzWbILf6Gs_H_nIjOViN1eQC3l2POL9LweohackcHaDhBHqIYmjFLsg/exec"; // URL Web App GAS setelah deploy
+  const API_URL = "https://script.google.com/macros/s/AKfycbzjjA_-76-GsKsS7KyppUMNeXg36IyYGdIdG2XSI-2ubtgnMe3cies7Sc24yTW00Y2NgA/exec";
 
-  // Buat / ambil device ID dari localStorage
+  // Buat / ambil device ID
   let deviceId = localStorage.getItem("deviceId");
   if (!deviceId) {
     deviceId = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
@@ -81,12 +81,21 @@
     body: JSON.stringify({ deviceId }),
   });
 
-  // Ambil jumlah pengunjung hari ini dari GAS
+  // Ambil semua data dan filter hari ini
   fetch(API_URL)
     .then(res => res.json())
-    .then(data => {
+    .then(result => {
+      const today = new Date().toISOString().split("T")[0];
+      const totalHariIni = result.data.filter(item => {
+        let tanggal = item.Tanggal;
+        if (tanggal && typeof tanggal !== "string") {
+          tanggal = new Date(tanggal).toISOString().split("T")[0];
+        }
+        return tanggal === today;
+      }).length;
+
       document.getElementById("pengunjung-hari-ini").textContent =
-        "Jumlah pengunjung hari ini " + data.total;
+        "Jumlah pengunjung hari ini " + totalHariIni;
     })
     .catch(err => console.error(err));
 </script>
